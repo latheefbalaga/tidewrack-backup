@@ -13,8 +13,22 @@
 		"speaker": "",
 		"text": "You close your eyes. The lamp above you is cold and dead.",
 		"choices": [
-			{ "text": "She was tired and seeing things.", "next": "logbook_skeptic", "set_flag": { "skeptic": true } },
-			{ "text": "Something was really out there.", "next": "logbook_believer", "set_flag": { "believer": true } }
+			{
+				"text": "She was tired and seeing things.",
+				"next": "logbook_skeptic",
+				"set_flag": {
+					"skeptic": true,
+					"believer": false
+				}
+			},
+			{
+				"text": "Something was really out there.",
+				"next": "logbook_believer",
+				"set_flag": {
+					"believer": true,
+					"skeptic": false
+				}
+			}
 		]
 	},
 	"logbook_skeptic": {
@@ -36,8 +50,20 @@
 		"speaker": "",
 		"text": "That was eleven days ago. The dinghy is gone from the boathouse.",
 		"choices": [
-			{ "text": "Radio the mainland about this.", "next": "logbook_end_radio", "set_flag": { "trusted_edith": true } },
-			{ "text": "Keep it to yourself for now.", "next": "logbook_end_quiet", "set_flag": { "trusted_edith": false } }
+			{
+				"text": "Radio the mainland about this.",
+				"next": "logbook_end_radio",
+				"set_flag": {
+					"trusted_edith": true
+				}
+			},
+			{
+				"text": "Keep it to yourself for now.",
+				"next": "logbook_end_quiet",
+				"set_flag": {
+					"trusted_edith": false
+				}
+			}
 		]
 	},
 	"logbook_end_radio": {
@@ -59,8 +85,20 @@
 		"speaker": "Tom Salish",
 		"text": "\"Weather's turning by the weekend. I'll run your next supply Thursday if the water lets me.\"",
 		"choices": [
-			{ "text": "Ask him about Edith.", "next": "radio_edith", "set_flag": { "radioed_tom": true } },
-			{ "text": "Just check in.", "next": "radio_checkin", "set_flag": { "radioed_tom": true } }
+			{
+				"text": "Ask him about Edith.",
+				"next": "radio_edith",
+				"set_flag": {
+					"radioed_tom": true
+				}
+			},
+			{
+				"text": "Just check in.",
+				"next": "radio_checkin",
+				"set_flag": {
+					"radioed_tom": true
+				}
+			}
 		]
 	},
 	"radio_edith": {
