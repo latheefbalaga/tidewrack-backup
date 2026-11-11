@@ -1,0 +1,62 @@
+{
+  "ending_1_tom": {
+    "speaker": "Tom Salish",
+    "text": "The radio crackles once more. Tom's voice comes through: 'I heard you. Edith's account deserves to be remembered.'",
+    "next": "ending_1_leaf"
+  },
+  "ending_1_silent": {
+    "speaker": "",
+    "text": "The radio stays quiet. You carry Edith's account forward without Tom's reply.",
+    "next": "ending_1_leaf"
+  },
+  "ending_2_tom": {
+    "speaker": "Tom Salish",
+    "text": "Tom answers over the radio: 'I heard what you said. I still wish Edith had told me more.'",
+    "next": "ending_2_leaf"
+  },
+  "ending_2_silent": {
+    "speaker": "",
+    "text": "No reply comes from the mainland. You keep your belief in the light to yourself.",
+    "next": "ending_2_leaf"
+  },
+  "ending_3_tom": {
+    "speaker": "Tom Salish",
+    "text": "Tom's voice returns through the static: 'I'll keep the channel open. Let me know if anything changes.'",
+    "next": "ending_3_leaf"
+  },
+  "ending_3_silent": {
+    "speaker": "",
+    "text": "The radio is quiet. You keep Edith's account, even without an answer from the mainland.",
+    "next": "ending_3_leaf"
+  },
+  "ending_4_tom": {
+    "speaker": "Tom Salish",
+    "text": "Tom replies briefly: 'I understand. The fog makes strange shapes of distant lights.'",
+    "next": "ending_4_leaf"
+  },
+  "ending_4_silent": {
+    "speaker": "",
+    "text": "The radio remains silent. Nothing interrupts the ordinary explanations you have settled on.",
+    "next": "ending_4_leaf"
+  },
+  "ending_1_leaf": {
+    "speaker": "",
+    "text": "Across the water, three flashes answer the lamp. Edith was not imagining the signal. You keep the light burning for whoever comes next, knowing her account was true.",
+    "next": null
+  },
+  "ending_2_leaf": {
+    "speaker": "",
+    "text": "The flashes return beyond the rocks. You still believe the light was real, but you chose not to trust Edith. You keep watch, wondering what that distance cost you both.",
+    "next": null
+  },
+  "ending_3_leaf": {
+    "speaker": "",
+    "text": "You keep the lamp burning and preserve Edith's account, though you cannot accept what she believed she saw. The light beyond the rocks remains unexplained, and the choice to keep her story alive is yours.",
+    "next": null
+  },
+  "ending_4_leaf": {
+    "speaker": "",
+    "text": "You settle on weather, reflections, or a distant vessel as the explanation. Edith's account remains in the logbook, but you do not trust her reading of it. The lamp turns steadily over an ordinary, still-uncertain sea.",
+    "next": null
+  }
+}
