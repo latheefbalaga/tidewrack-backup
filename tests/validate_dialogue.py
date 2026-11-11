@@ -52,6 +52,34 @@ def reachable(graph: dict, entries: set[str]) -> set[str]:
     return seen
 
 
+
+def collect_set_flags(graph: dict) -> set[str]:
+    """Collect flag names only from set_flag dictionaries on nodes and choices.
+
+    Dialogue prose is intentionally ignored; mentioning a flag name in
+    speaker/text content does not mean the graph sets that flag.
+    """
+    flags: set[str] = set()
+    for node in graph.values():
+        if not isinstance(node, dict):
+            continue
+
+        node_flags = node.get("set_flag")
+        if isinstance(node_flags, dict):
+            flags.update(str(name) for name in node_flags)
+
+        choices = node.get("choices")
+        if isinstance(choices, list):
+            for choice in choices:
+                if not isinstance(choice, dict):
+                    continue
+                choice_flags = choice.get("set_flag")
+                if isinstance(choice_flags, dict):
+                    flags.update(str(name) for name in choice_flags)
+
+    return flags
+
+
 def validate_file(path: Path) -> tuple[list[str], list[str]]:
     errors: list[str] = []
     warnings: list[str] = []
@@ -121,8 +149,20 @@ def main() -> int:
         errs, warns = validate_file(path)
         all_errors += errs
         all_warnings += warns
+
+        try:
+            graph = json.loads(path.read_text())
+        except json.JSONDecodeError:
+            graph = {}
+
+        node_count = len(graph) if isinstance(graph, dict) else 0
+        flags = collect_set_flags(graph) if isinstance(graph, dict) else set()
+        flag_summary = ", ".join(sorted(flags)) if flags else "none"
         status = "OK" if not errs else "FAIL"
-        print(f"[{status}] {path.relative_to(ROOT)}  ({len(json.loads(path.read_text()))} nodes)")
+        print(
+            f"[{status}] {path.relative_to(ROOT)}  "
+            f"({node_count} nodes) | flags: {flag_summary}"
+        )
 
     for w in all_warnings:
         print(f"  warning: {w}")
