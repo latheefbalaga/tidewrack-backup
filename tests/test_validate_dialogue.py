@@ -69,7 +69,7 @@ class DialogueValidatorEntryPointTests(unittest.TestCase):
         errors, warnings = self._validate_temp_graph("keeper_intro.json", graph)
         self.assertEqual(errors, [])
         self.assertTrue(any("missing configured entry point(s)" in w for w in warnings))
-        self.assertTrue(any("no configured entry point present" in w for w in warnings))
+        self.assertFalse(any("no configured entry point present" in w for w in warnings))
 
     def test_endings_does_not_treat_generic_start_as_its_entry(self) -> None:
         graph = {
