@@ -4,6 +4,8 @@ extends Node2D
 ## pause overlay in code.
 
 const DIALOGUE := "res://data/dialogue/keeper_intro.json"
+const LAMP_ROOM_DIALOGUE := "res://data/dialogue/lamp_room.json"
+const ENDINGS_DIALOGUE := "res://data/dialogue/endings.json"
 const INTERACT_RADIUS := 90.0
 const ROOM := Rect2(120, 140, 1040, 460)
 
@@ -12,6 +14,7 @@ var _interactables: Array[Interactable] = []
 var _prompt: Label
 var _nearest: Interactable = null
 var _paused: bool = false
+var _pending_dialogue_transition: String = ""
 
 
 func _ready() -> void:
@@ -24,7 +27,7 @@ func _ready() -> void:
 	add_child(dialogue_box)
 
 	DialogueManager.dialogue_started.connect(func(): _set_movement(false))
-	DialogueManager.dialogue_finished.connect(func(): _set_movement(true))
+	DialogueManager.dialogue_finished.connect(_on_dialogue_finished)
 
 
 func _build_room() -> void:
@@ -77,7 +80,78 @@ func _add_interactable(label: String, prompt: String, start_id: String, pos: Vec
 	item.position = pos
 	add_child(item)
 	item.setup()
+	item.interacted.connect(_on_interactable_interacted)
 	_interactables.append(item)
+
+
+func _on_interactable_interacted(item: Interactable) -> void:
+	# Only completing the stair/door conversation advances into the lamp-room
+	# sequence. Logbook and radio conversations retain their existing behavior.
+	_pending_dialogue_transition = "lamp_room" if item.dialogue_path == DIALOGUE and item.dialogue_start == "door" else ""
+
+
+func _on_dialogue_finished() -> void:
+	_set_movement(true)
+
+	match _pending_dialogue_transition:
+		"lamp_room":
+			_pending_dialogue_transition = "endings"
+			if not DialogueManager.start(LAMP_ROOM_DIALOGUE, "start"):
+				_pending_dialogue_transition = ""
+				push_error("Game: could not start the lamp-room dialogue.")
+		"endings":
+			_pending_dialogue_transition = ""
+			_start_ending_dialogue()
+		_:
+			_pending_dialogue_transition = ""
+
+
+func _start_ending_dialogue() -> void:
+	var is_believer := _read_boolean_flag("believer", false)
+	var is_skeptic := _read_boolean_flag("skeptic", false)
+
+	if is_believer and is_skeptic:
+		push_warning("GameState: both 'believer' and 'skeptic' are true; defaulting to believer.")
+		is_skeptic = false
+		GameState.set_flag("skeptic", false)
+	elif not is_believer and not is_skeptic:
+		push_warning("GameState: neither 'believer' nor 'skeptic' is true; defaulting to skeptic.")
+		is_believer = false
+		is_skeptic = true
+		GameState.set_flag("believer", false)
+		GameState.set_flag("skeptic", true)
+
+	var trusted_edith := _read_boolean_flag("trusted_edith", false, true)
+	var radioed_tom := _read_boolean_flag("radioed_tom", false)
+
+	# The belief/trust pair chooses one of exactly four leaves.
+	# radioed_tom changes only the epilogue entry variant, never the ending.
+	var ending_number := 4
+	if is_believer:
+		ending_number = 1 if trusted_edith else 2
+	else:
+		ending_number = 3 if trusted_edith else 4
+
+	var epilogue_variant := "tom" if radioed_tom else "silent"
+	var entry_id := "ending_%d_%s" % [ending_number, epilogue_variant]
+	if not DialogueManager.start(ENDINGS_DIALOGUE, entry_id):
+		push_error("Game: could not start ending dialogue at '%s'." % entry_id)
+
+
+func _read_boolean_flag(flag_name: String, default_value: bool, warn_if_missing: bool = false) -> bool:
+	if not GameState.flags.has(flag_name):
+		if warn_if_missing:
+			push_warning("GameState: flag '%s' is missing; defaulting to %s." % [flag_name, str(default_value)])
+			GameState.set_flag(flag_name, default_value)
+		return default_value
+
+	var stored_value: Variant = GameState.get_flag(flag_name, default_value)
+	if typeof(stored_value) != TYPE_BOOL:
+		push_warning("GameState: flag '%s' is not Boolean; defaulting to %s." % [flag_name, str(default_value)])
+		GameState.set_flag(flag_name, default_value)
+		return default_value
+
+	return stored_value
 
 
 func _build_hud() -> void:
