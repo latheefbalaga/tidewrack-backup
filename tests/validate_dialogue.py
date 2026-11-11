@@ -19,14 +19,21 @@ import json
 import sys
 from pathlib import Path
 
-# Entry-point node ids the game starts graphs from (see scripts/game.gd).
-KNOWN_ENTRIES = {
-    "logbook", "radio", "door", "start",
-    "ending_1_tom", "ending_1_silent",
-    "ending_2_tom", "ending_2_silent",
-    "ending_3_tom", "ending_3_silent",
-    "ending_4_tom", "ending_4_silent",
+# Exact entry points used by each dialogue file in the current game flow.
+# Endings are entered directly by scripts/game.gd using one of the eight
+# belief/trust + radio variants; they do not start at "start".
+ENTRY_POINTS_BY_FILE = {
+    "keeper_intro.json": {"logbook", "radio", "door"},
+    "lamp_room.json": {"start"},
+    "endings.json": {
+        "ending_1_tom", "ending_1_silent",
+        "ending_2_tom", "ending_2_silent",
+        "ending_3_tom", "ending_3_silent",
+        "ending_4_tom", "ending_4_silent",
+    },
 }
+# New dialogue files follow DialogueManager.start(path)'s default entry.
+DEFAULT_ENTRY_POINTS = {"start"}
 
 ROOT = Path(__file__).resolve().parent.parent
 DIALOGUE_DIR = ROOT / "data" / "dialogue"
@@ -126,13 +133,26 @@ def validate_file(path: Path) -> tuple[list[str], list[str]]:
     if not has_terminal:
         errors.append(f"{path.name}: no terminal node (a node with next == null) — the graph never ends")
 
-    entries = KNOWN_ENTRIES & set(graph.keys())
+    configured_entries = ENTRY_POINTS_BY_FILE.get(path.name, DEFAULT_ENTRY_POINTS)
+    entries = configured_entries & set(graph.keys())
+
+    missing_entries = configured_entries - set(graph.keys())
+    if missing_entries:
+        warnings.append(
+            f"{path.name}: missing configured entry point(s) {sorted(missing_entries)}"
+        )
+
     if not entries:
-        warnings.append(f"{path.name}: no known entry point ({sorted(KNOWN_ENTRIES)}) present")
+        warnings.append(
+            f"{path.name}: no configured entry point present "
+            f"({sorted(configured_entries)})"
+        )
     else:
         seen = reachable(graph, entries)
         for orphan in sorted(set(graph) - seen):
-            warnings.append(f"{path.name}:{orphan}: unreachable from entry points {sorted(entries)}")
+            warnings.append(
+                f"{path.name}:{orphan}: unreachable from entry points {sorted(entries)}"
+            )
 
     return errors, warnings
 
