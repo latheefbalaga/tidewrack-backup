@@ -80,7 +80,6 @@ func _add_interactable(label: String, prompt: String, start_id: String, pos: Vec
 	item.position = pos
 	add_child(item)
 	item.setup()
-	item.interacted.connect(_on_interactable_interacted)
 	_interactables.append(item)
 
 
