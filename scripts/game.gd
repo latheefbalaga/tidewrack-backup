@@ -84,12 +84,6 @@ func _add_interactable(label: String, prompt: String, start_id: String, pos: Vec
 	_interactables.append(item)
 
 
-func _on_interactable_interacted(item: Interactable) -> void:
-	# Only completing the stair/door conversation advances into the lamp-room
-	# sequence. Logbook and radio conversations retain their existing behavior.
-	_pending_dialogue_transition = "lamp_room" if item.dialogue_path == DIALOGUE and item.dialogue_start == "door" else ""
-
-
 func _on_dialogue_finished() -> void:
 	_set_movement(true)
 
@@ -151,7 +145,7 @@ func _read_boolean_flag(flag_name: String, default_value: bool, warn_if_missing:
 		GameState.set_flag(flag_name, default_value)
 		return default_value
 
-	return stored_value
+	return bool(stored_value)
 
 
 func _build_hud() -> void:
@@ -203,7 +197,10 @@ func _unhandled_input(event: InputEvent) -> void:
 	if _paused or DialogueManager.is_active:
 		return
 	if event.is_action_pressed("ui_accept") and _nearest != null:
-		_nearest.interact()
+		var interacted_item := _nearest
+		interacted_item.interact()
+		# Mark the transition only if the door dialogue actually started.
+		_pending_dialogue_transition = "lamp_room" if interacted_item.dialogue_path == DIALOGUE and interacted_item.dialogue_start == "door" and DialogueManager.is_active else ""
 		get_viewport().set_input_as_handled()
 
 
